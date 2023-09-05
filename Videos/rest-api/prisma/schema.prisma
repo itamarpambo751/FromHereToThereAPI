@@ -1,0 +1,89 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model Restaurant {
+	id 					String @id @default(uuid())
+	name 				String @unique
+	email				String @unique
+	phone           	Int @unique
+	createdAt 			DateTime @default(now())
+	updatedAt 			DateTime @updatedAt
+	manager_id 			String
+
+	location			Location?
+	products 			Products[]
+}
+
+model Manager {
+	id 					String @id @default(uuid())
+	name				String
+	phone				Int @unique
+	email				String @unique
+}
+
+model Products {
+	id 					String @id @default(uuid())
+	name 				String
+	image_url			String
+	price 				Float
+	description			String
+	restaurant_id 		String
+	createdAt 			DateTime @default(now())
+	updatedAt 			DateTime @updatedAt
+
+	restaurant 			Restaurant @relation(fields: [restaurant_id], references: [id])
+	orders 				Order[]
+	reactions			Reactions[]
+}
+
+model Customer {
+	id 					String @id @default(uuid())
+	user_name 			String @unique
+	password 			String
+	phone_number		Int @unique
+
+	orders 				Order[]
+	location			Location?
+}
+
+
+model Order {
+	id 					String @id @default(uuid())
+	product_id 			String
+	customer_id 		String
+
+	quant				Int
+	createdAt 			DateTime @default(now())
+	createdAtYear		Int
+	createdAtMonth		Int
+
+	product 			Products @relation(fields: [product_id], references: [id])
+	customer 			Customer @relation(fields: [customer_id], references: [id])
+
+	state				String
+	updatedAt 			DateTime @updatedAt
+}
+
+model Reactions {
+	id 					String @id @default(uuid())
+	product_id			String
+	type				String
+	product 			Products @relation(fields: [product_id], references: [id])
+}
+
+model Location {
+	id 					String @id @default(uuid())
+	longitude			Float
+	latitude 			Float
+	customer_id			String? @unique
+	restaurant_id		String? @unique
+
+	customer 			Customer? @relation(fields: [customer_id], references: [id])
+	restaurant			Restaurant? @relation(fields: [restaurant_id], references: [id])
+}
